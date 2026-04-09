@@ -5,7 +5,10 @@ pipeline{
     }
     parameters {
         choice(name: 'PACKER_BUILD', choices: ['no', 'yes'], description: 'Choose an action')
-        string(name: 'REGION', defaultValue: 'us-east-1', description: 'Provide Region')
+        string(name: 'REGION', defaultValue: 'ap-south-1', description: 'Provide Region')
+        choice(name: 'TERRAFORM_APPLY', choices: ['no', 'yes'], description: 'Choose an action')
+        choice(name: 'TERRAFORM_DESTROY', choices: ['no', 'yes'], description: 'Choose an action')
+       
     }
     stages{
         stage('git checkout'){
@@ -22,7 +25,7 @@ pipeline{
                 '''
             }
         }
-         stage('packer build'){
+              stage('packer build'){
                 when {
                     expression { return params.PACKER_BUILD =='yes'}
                 }
@@ -35,7 +38,33 @@ pipeline{
                 expression { return params.PACKER_BUILD == 'yes' }
             }
             steps{
-                amicapture(params.REGION)
+                amicapture()
+            }
+        }
+        stage('capture the latest ami'){
+            steps {
+                latestami(params.REGION)
+            }
+        }
+        stage('Terraform_Plan') {
+            steps{
+                terraformplan()
+            }
+        }
+        stage('Terraform_Apply'){
+                when{
+                expression { return params.TERRAFORM_APPLY == 'yes' }
+            }
+            steps{
+                sh 'terraform apply --auto-approve'
+            }
+        }
+        stage('Terraform_Destory'){
+            when{
+                expression { return params.TERRAFORM_DESTROY == 'yes '}
+            }
+            steps {
+                sh 'terraform destory --auto-approve'
             }
         }
     }

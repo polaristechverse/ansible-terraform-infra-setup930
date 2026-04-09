@@ -1,0 +1,60 @@
+- name: install nginx on all servers
+  hosts: all
+  gather_facts: true
+  become: true
+  tasks:
+    - name: install nginx
+      apt:
+        updte_cache: true
+        name: nginx
+        state: present
+    - name: service start
+      service:
+        name: nginx
+        state: started
+- name: configure proxy
+  hosts: proxy
+  gather_facts: true
+  become: true
+  tasks:
+    - name: update the proxy pass in the default file
+      blockinfile:
+        path: /etc/nginx/sites-available/default
+        insertafter: "server_name _;"
+        block: |
+          location /myapp/ {
+            proxy_pass http://myapp/;
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+          }
+      notify:
+        - Restart nginx
+    - name: edit nginx conf
+      blockinfile:
+        path: /etc/nginx/nginx.conf
+        insertafter: "http {"
+        block: |
+          upstream myapp {
+          {% for host in groups['web'] %}
+              server {{ hostvars[host]['ansible_host'] }}:80;
+          {% endfor %}
+          }
+      notify: Restart nginx
+  handlers:
+    - name: Restart nginx
+      service:
+        name: nginx
+        state: restarted
+- name: configure web servers
+  hosts: web
+  gather_facts: true
+  become: true
+  tasks:
+    - name: copy index file
+      copy:
+        src: index.html
+        dest: /var/www/html/index.html
+    - name: insert line in index.html
+      lineinfile:
+        insertafter: "</body>"
+        line: "<h1><center>{{ hostvars[host]['ansible_host'] }}</center></h1>"
