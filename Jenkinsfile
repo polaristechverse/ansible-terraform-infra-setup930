@@ -65,6 +65,7 @@ pipeline{
                 expression { return params.TERRAFORM_DESTROY == 'yes '}
             }
             steps {
+                sh 'terraform init'
                 sh 'terraform destory --auto-approve'
             }
         }
