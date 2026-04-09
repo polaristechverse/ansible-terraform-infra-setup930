@@ -8,6 +8,7 @@ pipeline{
         string(name: 'REGION', defaultValue: 'ap-south-1', description: 'Provide Region')
         choice(name: 'TERRAFORM_APPLY', choices: ['no', 'yes'], description: 'Choose an action')
         choice(name: 'TERRAFORM_DESTROY', choices: ['no', 'yes'], description: 'Choose an action')
+        choice(name: 'Ansible_Build', choices: ['no', 'yes'], description: 'Choose an action')   
        
     }
     stages{
@@ -68,6 +69,9 @@ pipeline{
             }
         }
         stage('Ansible apply'){
+             when{
+                expression { return params.Ansible_Build == 'yes '}
+            }
             steps{
                 sh 'ansible-playbook -i invfile webproxy.yaml --syntax-check'
                 sh 'ansible-playbook -i invfile webproxy.yaml --check'
