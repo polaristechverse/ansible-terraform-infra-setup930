@@ -69,7 +69,8 @@ pipeline{
         }
         stage('Ansible apply'){
             steps{
-                sh 'ansible-playbook -i invfile all -m ping'
+                sh 'ansible-playbook -i invfile webproxy.yaml --syntax-check'
+                sh 'ansible-playbook -i invfile webproxy.yaml --check'
             }
         }
     }
