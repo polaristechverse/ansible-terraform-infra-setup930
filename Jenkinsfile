@@ -71,6 +71,7 @@ pipeline{
             steps{
                 sh 'ansible-playbook -i invfile webproxy.yaml --syntax-check'
                 sh 'ansible-playbook -i invfile webproxy.yaml --check'
+                sh 'ansible-playbook -i invfile webproxy.yaml'
             }
         }
     }
