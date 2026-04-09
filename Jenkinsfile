@@ -1,3 +1,4 @@
+@Library('my-infra-lib') _
 pipeline{
     agent{
         label 'Dev'
