@@ -67,5 +67,10 @@ pipeline{
                 sh 'terraform destory --auto-approve'
             }
         }
+        stage('Ansible apply'){
+            steps{
+                sh 'ansible-playbook -i invfile all -m ping'
+            }
+        }
     }
 }
