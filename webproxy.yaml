@@ -54,7 +54,9 @@
       copy:
         src: index.html
         dest: /var/www/html/index.html
-    - name: insert line in index.html
-      lineinfile:
-        insertafter: "</body>"
-        line: "<h1><center>{{ hostvars[host]['ansible_host'] }}</center></h1>"
+    - name: insert all web server IPs
+  lineinfile:
+    path: /var/www/html/index.html
+    insertafter: "</body>"
+    line: "<h1><center>{{ item }}</center></h1>"
+  loop: "{{ groups['web'] | map('extract', hostvars, 'ansible_host') | list }}"
